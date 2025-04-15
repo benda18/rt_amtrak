@@ -31,3 +31,17 @@ library(httr)
 
 
 ?gtfsway::gtfs_realtime()
+
+amtrakRT.url <- "https://asm-backend.transitdocs.com/gtfs/amtrak"
+amtrakRT.url <- "https://gtfsrt.api.translink.com.au/Feed/SEQ"
+
+response <- httr::GET(amtrakRT.url,
+                      httr::accept_json(),
+                      httr::add_headers('Authorization' = '')
+                      )
+
+amtrakRT.feed <- gtfs_realtime(response, content = "VehiclePosition")
+
+str(amtrakRT.feed)
+
+View(amtrakRT.feed)
