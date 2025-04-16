@@ -3,6 +3,10 @@ library(readr)
 library(ggplot2)
 library(lubridate)
 library(dplyr)
+#library(KMEANS.KNN)
+library(cluster)
+#library(FNN)
+library(nngeo)
 
 snapshot()
 
@@ -174,6 +178,37 @@ at_64rt <- read_csv("latitude,longitude,update_time,speed,heading,message
 35.253139,-80.781886,2025-04-12T13:35:40-04:00,0.0,,
 ")
 
+
+
+#km.data <- KMEANS.KNN::find_Kmeans_best_k(data = at_64rt[,c("longitude", "latitude")])
+
+#View(km.data)
+
+# cluster::clusplot(x = at_64rt[!is.na(at_64rt$speed),c("latitude", "longitude", "speed", "heading")])
+
+clu_f <- cluster::fanny(x = at_64rt[!is.na(at_64rt$speed),c("speed")], 
+               k = 5)
+
+
+clu_f$clustering 
+
+cluster::clusGap(x = at_64rt[!is.na(at_64rt$speed),c("speed")], 
+                 FUNcluster = fanny, 
+                 K.max = 5)
+
+
+ggplot() + 
+  geom_point(data = at_64rt[!is.na(at_64rt$speed),], 
+             aes(x = longitude, y = latitude, 
+                 color = factor(clu_f$clustering)))
+
+
+ggplot() + 
+  geom_point(aes(y = at_64rt[!is.na(at_64rt$speed),]$speed, 
+                 x = clu_f$clustering))
+
+args(clusplot)
+
 at_64rt$date <- at_64rt$update_time %>% 
   with_tz(., tzone = "America/New_York") %>%
   as_date()
@@ -197,7 +232,9 @@ ggplot(data = at_64rt,
   coord_quickmap()
 
 lm(data = at_64rt, 
-   formula = longitude~speed)
+   formula = longitude~speed) %>% summary()
+
+
 
 ggplot() + 
   geom_point(data = at_64rt, 
